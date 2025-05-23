@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
     return BlocProvider(
       create: (context) => AudioBloc(),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Music Playlist App',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),

@@ -63,3 +63,5 @@ class SeekTo extends AudioEvent {
   @override
   List<Object> get props => [position];
 }
+
+class ReturnToPlaylists extends AudioEvent {}

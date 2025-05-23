@@ -22,7 +22,12 @@ class PlaylistScreen extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) => const PlaylistDetailScreen(),
             ),
-          );
+          ).then((_) {
+            // When returning from the detail screen, make sure we're in playlists view
+            if (state.currentView != ScreenView.playlists) {
+              context.read<AudioBloc>().add(ReturnToPlaylists());
+            }
+          });
         }
       },
       child: Scaffold(
@@ -172,6 +177,18 @@ class PlaylistScreen extends StatelessWidget {
           width: 56,
           height: 56,
           fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              width: 56,
+              height: 56,
+              color: Colors.grey[800],
+              child: const Icon(
+                Icons.music_note,
+                size: 28,
+                color: Colors.white,
+              ),
+            );
+          },
         ),
       ),
       title: Text(

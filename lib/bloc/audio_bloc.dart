@@ -27,6 +27,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     on<UpdatePosition>(_onUpdatePosition);
     on<UpdateDuration>(_onUpdateDuration);
     on<SeekTo>(_onSeekTo);
+    on<ReturnToPlaylists>(_onReturnToPlaylists);
 
     // Listen to position changes
     _positionSubscription = _audioPlayer.positionStream.listen(
@@ -60,27 +61,6 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
       LoadPlaylists event, Emitter<AudioState> emit) async {
     emit(state.copyWith(status: AudioStatus.loading));
     try {
-      // Uncomment this to use real API data
-      // final response = await http.get(Uri.parse('$_apiBaseUrl/playlists'));
-      // if (response.statusCode == 200) {
-      //   final List<dynamic> data = json.decode(response.body);
-      //   final playlists = data.map((json) => Playlist(
-      //     id: json['id'],
-      //     name: json['name'],
-      //     creator: json['creator'],
-      //     coverUrl: json['coverUrl'],
-      //     songIds: List<String>.from(json['songIds']),
-      //   )).toList();
-      //   emit(state.copyWith(
-      //     playlists: playlists,
-      //     status: AudioStatus.loaded,
-      //     currentView: ScreenView.playlists,
-      //   ));
-      // } else {
-      //   throw Exception('Failed to load playlists');
-      // }
-
-      // Using mock data for now
       final playlists = [
         Playlist(
           id: '1',
@@ -132,82 +112,157 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
       LoadPlaylistSongs event, Emitter<AudioState> emit) async {
     emit(state.copyWith(status: AudioStatus.loading));
     try {
-      // Uncomment this to use real API data
-      // final response = await http.get(
-      //   Uri.parse('$_apiBaseUrl/playlists/${event.playlist.id}/songs')
-      // );
-      // if (response.statusCode == 200) {
-      //   final List<dynamic> data = json.decode(response.body);
-      //   final songs = data.map((json) => Song(
-      //     id: json['id'],
-      //     title: json['title'],
-      //     artist: json['artist'],
-      //     url: json['url'],
-      //     coverUrl: json['coverUrl'],
-      //     duration: json['duration'],
-      //   )).toList();
-      //
-      //   emit(state.copyWith(
-      //     currentPlaylistSongs: songs,
-      //     currentPlaylist: event.playlist,
-      //     status: AudioStatus.loaded,
-      //     currentView: ScreenView.playlistDetail,
-      //   ));
-      // } else {
-      //   throw Exception('Failed to load songs');
-      // }
+      // Different songs for each playlist
+      final Map<String, List<Song>> playlistSongs = {
+        '1': [
+          Song(
+            id: '1',
+            title: 'Ashamed',
+            artist: 'Omar Apollo',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+            coverUrl: 'https://picsum.photos/id/11/200/200',
+            duration: '3:24',
+          ),
+          Song(
+            id: '2',
+            title: 'Kickback',
+            artist: 'Omar Apollo',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+            coverUrl: 'https://picsum.photos/id/12/200/200',
+            duration: '2:51',
+          ),
+          Song(
+            id: '3',
+            title: 'So Good',
+            artist: 'Omar Apollo',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+            coverUrl: 'https://picsum.photos/id/13/200/200',
+            duration: '4:26',
+          ),
+        ],
+        '2': [
+          Song(
+            id: '4',
+            title: 'Summer Nights',
+            artist: 'John Legend',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+            coverUrl: 'https://picsum.photos/id/14/200/200',
+            duration: '3:15',
+          ),
+          Song(
+            id: '5',
+            title: 'Sunshine',
+            artist: 'Dua Lipa',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+            coverUrl: 'https://picsum.photos/id/15/200/200',
+            duration: '2:48',
+          ),
+          Song(
+            id: '6',
+            title: 'Beach Day',
+            artist: 'The Weeknd',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
+            coverUrl: 'https://picsum.photos/id/16/200/200',
+            duration: '3:23',
+          ),
+        ],
+        '3': [
+          Song(
+            id: '7',
+            title: 'Techno Beat',
+            artist: 'DJ Alesso',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3',
+            coverUrl: 'https://picsum.photos/id/17/200/200',
+            duration: '4:12',
+          ),
+          Song(
+            id: '8',
+            title: 'Electronic Pulse',
+            artist: 'Avicii',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
+            coverUrl: 'https://picsum.photos/id/18/200/200',
+            duration: '3:45',
+          ),
+          Song(
+            id: '9',
+            title: 'Digital Dreams',
+            artist: 'Deadmau5',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3',
+            coverUrl: 'https://picsum.photos/id/19/200/200',
+            duration: '5:20',
+          ),
+        ],
+        '4': [
+          Song(
+            id: '10',
+            title: 'Chill Vibes',
+            artist: 'Khalid',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3',
+            coverUrl: 'https://picsum.photos/id/20/200/200',
+            duration: '3:33',
+          ),
+          Song(
+            id: '11',
+            title: 'Relax Mode',
+            artist: 'Frank Ocean',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+            coverUrl: 'https://picsum.photos/id/21/200/200',
+            duration: '4:17',
+          ),
+          Song(
+            id: '12',
+            title: 'Mellow Mood',
+            artist: 'Daniel Caesar',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+            coverUrl: 'https://picsum.photos/id/22/200/200',
+            duration: '3:05',
+          ),
+        ],
+        '5': [
+          Song(
+            id: '13',
+            title: 'Indie Rock',
+            artist: 'Arctic Monkeys',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+            coverUrl: 'https://picsum.photos/id/23/200/200',
+            duration: '4:02',
+          ),
+          Song(
+            id: '14',
+            title: 'Alternative Beats',
+            artist: 'Tame Impala',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+            coverUrl: 'https://picsum.photos/id/24/200/200',
+            duration: '3:56',
+          ),
+          Song(
+            id: '15',
+            title: 'Hipster Vibes',
+            artist: 'Mac DeMarco',
+            url:
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+            coverUrl: 'https://picsum.photos/id/25/200/200',
+            duration: '3:22',
+          ),
+        ],
+      };
 
-      // Using mock data for now
-      final songs = [
-        Song(
-          id: '1',
-          title: 'Ashamed',
-          artist: 'Omar Apollo',
-          url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
-          coverUrl: 'https://picsum.photos/id/11/200/200',
-          duration: '3:24',
-        ),
-        Song(
-          id: '2',
-          title: 'Kickback',
-          artist: 'Omar Apollo',
-          url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
-          coverUrl: 'https://picsum.photos/id/12/200/200',
-          duration: '2:51',
-        ),
-        Song(
-          id: '3',
-          title: 'So Good',
-          artist: 'Omar Apollo',
-          url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
-          coverUrl: 'https://picsum.photos/id/13/200/200',
-          duration: '4:26',
-        ),
-        Song(
-          id: '4',
-          title: 'Frío',
-          artist: 'Omar Apollo',
-          url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
-          coverUrl: 'https://picsum.photos/id/14/200/200',
-          duration: '2:05',
-        ),
-        Song(
-          id: '5',
-          title: 'Brakelights',
-          artist: 'Omar Apollo',
-          url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
-          coverUrl: 'https://picsum.photos/id/15/200/200',
-          duration: '2:48',
-        ),
-        Song(
-          id: '6',
-          title: 'Trouble',
-          artist: 'Omar Apollo',
-          url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
-          coverUrl: 'https://picsum.photos/id/16/200/200',
-          duration: '3:23',
-        ),
-      ];
+      // Get songs for the selected playlist
+      final songs = playlistSongs[event.playlist.id] ?? [];
 
       emit(state.copyWith(
         currentPlaylistSongs: songs,
@@ -234,6 +289,13 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
       // Set up and play the audio in the background
       await _audioPlayer.stop();
       await _audioPlayer.setUrl(event.song.url);
+
+      // Get the duration immediately if possible
+      final duration = await _audioPlayer.durationFuture;
+      if (duration != null) {
+        emit(state.copyWith(duration: duration));
+      }
+
       await _audioPlayer.play();
     } catch (e) {
       emit(state.copyWith(error: e.toString()));
@@ -277,6 +339,13 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
         add(PlaySong(previousSong));
       }
     }
+  }
+
+  void _onReturnToPlaylists(ReturnToPlaylists event, Emitter<AudioState> emit) {
+    emit(state.copyWith(
+      currentView: ScreenView.playlists,
+      // Keep the current song playing if there is one
+    ));
   }
 
   @override

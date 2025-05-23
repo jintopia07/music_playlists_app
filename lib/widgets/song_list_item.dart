@@ -21,10 +21,21 @@ class SongListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
         child: Image.network(
           song.coverUrl,
-          width: 40,
-          height: 40,
+          width: 48,
+          height: 48,
           fit: BoxFit.cover,
-          key: ValueKey('img-${song.id}'),
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              width: 48,
+              height: 48,
+              color: Colors.grey[800],
+              child: const Icon(
+                Icons.music_note,
+                size: 24,
+                color: Colors.white,
+              ),
+            );
+          },
         ),
       ),
       title: Text(

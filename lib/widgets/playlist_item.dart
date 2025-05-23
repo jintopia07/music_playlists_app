@@ -14,7 +14,8 @@ class PlaylistItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      contentPadding:
+          const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(4.0),
         child: Image.network(
@@ -22,6 +23,18 @@ class PlaylistItem extends StatelessWidget {
           width: 60,
           height: 60,
           fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              width: 60,
+              height: 60,
+              color: Colors.grey[800],
+              child: const Icon(
+                Icons.music_note,
+                size: 30,
+                color: Colors.white,
+              ),
+            );
+          },
         ),
       ),
       title: Text(

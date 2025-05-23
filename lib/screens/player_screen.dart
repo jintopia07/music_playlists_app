@@ -13,7 +13,7 @@ class PlayerScreen extends StatefulWidget {
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  String _selectedTab = 'UP NEXT';
+  bool _showUpNext = false;
 
   @override
   Widget build(BuildContext context) {
@@ -48,322 +48,312 @@ class _PlayerScreenState extends State<PlayerScreen> {
         return Scaffold(
           backgroundColor: const Color(0xFF121212),
           appBar: AppBar(
-            backgroundColor: Colors.transparent,
+            backgroundColor: const Color(0xFF1E1B2E),
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.keyboard_arrow_down),
               onPressed: () => Navigator.pop(context),
             ),
-            title: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      'Song',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    style: TextButton.styleFrom(
-                      backgroundColor: const Color(0xFF2A2A2A),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
+            title: Column(
+              children: [
+                Text(
+                  state.currentSong!.title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(width: 8),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text(
-                      'Video',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
+                ),
+                Text(
+                  state.currentSong!.artist,
+                  style: const TextStyle(
+                    color: Colors.grey,
+                    fontSize: 12,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+            centerTitle: true,
             actions: [
               IconButton(
-                icon: const Icon(Icons.cast),
+                icon: const Icon(Icons.cast_outlined),
                 onPressed: () {},
               ),
               IconButton(
-                icon: const Icon(Icons.more_vert),
-                onPressed: () {},
+                icon: Icon(
+                  state.status == AudioStatus.playing
+                      ? Icons.pause
+                      : Icons.play_arrow,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  if (state.status == AudioStatus.playing) {
+                    context.read<AudioBloc>().add(PauseSong());
+                  } else {
+                    context.read<AudioBloc>().add(ResumeSong());
+                  }
+                },
               ),
             ],
           ),
-          body: _buildPlayerView(context, state, sliderValue),
+          body: Stack(
+            children: [
+              // Main player content
+              Column(
+                children: [
+                  // Album art
+                  Expanded(
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: AspectRatio(
+                          aspectRatio: 1.0,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              state.currentSong!.coverUrl,
+                              fit: BoxFit.cover,
+                              key: ValueKey(state.currentSong!.id),
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Colors.grey[800],
+                                  child: const Icon(
+                                    Icons.music_note,
+                                    size: 64,
+                                    color: Colors.white,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Progress bar and time
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      children: [
+                        // Progress slider
+                        SliderTheme(
+                          data: SliderThemeData(
+                            trackHeight: 2,
+                            thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 6,
+                            ),
+                            overlayShape: const RoundSliderOverlayShape(
+                              overlayRadius: 12,
+                            ),
+                            activeTrackColor: Colors.white,
+                            inactiveTrackColor: Colors.grey[800],
+                            thumbColor: Colors.white,
+                            overlayColor: Colors.white.withOpacity(0.2),
+                          ),
+                          child: Slider(
+                            value: sliderValue,
+                            onChanged: (value) {
+                              if (state.duration.inMilliseconds > 0) {
+                                final position = Duration(
+                                  milliseconds:
+                                      (value * state.duration.inMilliseconds)
+                                          .round(),
+                                );
+                                context.read<AudioBloc>().add(SeekTo(position));
+                              }
+                            },
+                          ),
+                        ),
+
+                        // Time indicators
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _formatDuration(state.position),
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
+                              Text(
+                                _formatDuration(state.duration),
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
+
+                  // Player controls
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24.0, vertical: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.shuffle,
+                              color: Colors.white, size: 24),
+                          onPressed: () {},
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.skip_previous,
+                              color: Colors.white, size: 32),
+                          onPressed: () {
+                            context.read<AudioBloc>().add(PreviousSong());
+                          },
+                        ),
+                        Container(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            icon: Icon(
+                              state.status == AudioStatus.playing
+                                  ? Icons.pause
+                                  : Icons.play_arrow,
+                              color: Colors.black,
+                              size: 32,
+                            ),
+                            onPressed: () {
+                              if (state.status == AudioStatus.playing) {
+                                context.read<AudioBloc>().add(PauseSong());
+                              } else {
+                                context.read<AudioBloc>().add(ResumeSong());
+                              }
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.skip_next,
+                              color: Colors.white, size: 32),
+                          onPressed: () {
+                            context.read<AudioBloc>().add(NextSong());
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.repeat,
+                              color: Colors.white, size: 24),
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Up Next button
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 24.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _showUpNext = !_showUpNext;
+                        });
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12.0,
+                          horizontal: 16.0,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2A2A40),
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Icon(
+                              Icons.queue_music,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Up Next',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              // Up Next overlay
+              if (_showUpNext)
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _showUpNext = false;
+                      });
+                    },
+                    child: Container(
+                      color: Colors.black.withOpacity(0.5),
+                      child: Column(
+                        children: [
+                          // Close button
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: IconButton(
+                                icon: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _showUpNext = false;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+
+                          // Up Next list
+                          Expanded(
+                            child: Container(
+                              margin: const EdgeInsets.all(16.0),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1E1B2E),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: UpNextList(
+                                  key: ValueKey(
+                                      'upnext-${state.currentSong!.id}'),
+                                  currentSong: state.currentSong!,
+                                  songs: state.currentPlaylistSongs,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         );
       },
-    );
-  }
-
-  Widget _buildPlayerView(
-      BuildContext context, AudioState state, double sliderValue) {
-    return Column(
-      children: [
-        Expanded(
-          flex: 2,
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                state.currentSong!.coverUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                key: ValueKey(state.currentSong!.id),
-              ),
-            ),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                state.currentSong!.title,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-                key: ValueKey('title-${state.currentSong!.id}'),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                state.currentSong!.artist,
-                style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 16,
-                ),
-                key: ValueKey('artist-${state.currentSong!.id}'),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.thumb_up_outlined,
-                            color: Colors.white),
-                        onPressed: () {},
-                      ),
-                      Text('26K', style: TextStyle(color: Colors.white)),
-                      const SizedBox(width: 16),
-                      IconButton(
-                        icon: const Icon(Icons.thumb_down_outlined,
-                            color: Colors.white),
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.comment_outlined,
-                            color: Colors.white),
-                        onPressed: () {},
-                      ),
-                      Text('484', style: TextStyle(color: Colors.white)),
-                    ],
-                  ),
-                  TextButton.icon(
-                    icon: const Icon(Icons.playlist_add, color: Colors.white),
-                    label: const Text('Save',
-                        style: TextStyle(color: Colors.white)),
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                      backgroundColor: const Color(0xFF2A2A2A),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                  ),
-                  TextButton.icon(
-                    icon: const Icon(Icons.share, color: Colors.white),
-                    label: const Text('16K',
-                        style: TextStyle(color: Colors.white)),
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            children: [
-              SliderTheme(
-                data: SliderThemeData(
-                  trackHeight: 2,
-                  thumbShape:
-                      const RoundSliderThumbShape(enabledThumbRadius: 6),
-                ),
-                child: Slider(
-                  value: sliderValue,
-                  onChanged: (value) {
-                    if (state.duration.inMilliseconds > 0) {
-                      final position = Duration(
-                        milliseconds:
-                            (value * state.duration.inMilliseconds).round(),
-                      );
-                      context.read<AudioBloc>().add(SeekTo(position));
-                    }
-                  },
-                  activeColor: Colors.white,
-                  inactiveColor: Colors.grey[800],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(_formatDuration(state.position),
-                        style: TextStyle(color: Colors.grey),
-                        key: ValueKey('position-${state.position.inSeconds}')),
-                    Text(_formatDuration(state.duration),
-                        style: TextStyle(color: Colors.grey),
-                        key: ValueKey('duration-${state.duration.inSeconds}')),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.shuffle,
-                        color: Colors.white, size: 28),
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.skip_previous,
-                        color: Colors.white, size: 36),
-                    onPressed: () {
-                      context.read<AudioBloc>().add(PreviousSong());
-                    },
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      icon: Icon(
-                        state.status == AudioStatus.playing
-                            ? Icons.pause
-                            : Icons.play_arrow,
-                        color: Colors.black,
-                        size: 36,
-                      ),
-                      onPressed: () {
-                        if (state.status == AudioStatus.playing) {
-                          context.read<AudioBloc>().add(PauseSong());
-                        } else {
-                          context.read<AudioBloc>().add(ResumeSong());
-                        }
-                      },
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.skip_next,
-                        color: Colors.white, size: 36),
-                    onPressed: () {
-                      context.read<AudioBloc>().add(NextSong());
-                    },
-                  ),
-                  IconButton(
-                    icon:
-                        const Icon(Icons.repeat, color: Colors.white, size: 28),
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildTabButton('UP NEXT'),
-                  _buildTabButton('LYRICS'),
-                  _buildTabButton('RELATED'),
-                ],
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        ),
-        // Show the appropriate content based on the selected tab
-        Expanded(
-          flex: 3,
-          child: _selectedTab == 'UP NEXT'
-              ? UpNextList(
-                  key: ValueKey('upnext-${state.currentSong!.id}'),
-                  currentSong: state.currentSong!,
-                  songs: state.currentPlaylistSongs,
-                )
-              : _selectedTab == 'LYRICS'
-                  ? const Center(
-                      child: Text(
-                        'Lyrics not available',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    )
-                  : const Center(
-                      child: Text(
-                        'Related content not available',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTabButton(String tabName) {
-    final isSelected = _selectedTab == tabName;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTab = tabName;
-        });
-      },
-      child: Column(
-        children: [
-          Text(
-            tabName,
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.grey,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Container(
-            height: 2,
-            width: 60,
-            color: isSelected ? Colors.white : Colors.transparent,
-          ),
-        ],
-      ),
     );
   }
 
