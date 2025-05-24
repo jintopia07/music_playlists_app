@@ -2,16 +2,17 @@
 
 A new Flutter project.
 
-## Getting Started
-
 This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
+** Recommend opening the run project with Chrome (web-javascript) **
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+*The songs are from an API that allows you to use licensed songs in the app*
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-# music_playlists_app
+<p align="center">
+  
+  <img src="assets/music/1.png" width="200" />
+  <img src="assets/music/2.png" width="200" />
+  <img src="assets/music/3.png" width="200" />
+ <img src="assets/music/4.png" width="200" />
+ 
+</p>
