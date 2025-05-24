@@ -32,9 +32,9 @@ class PlaylistScreen extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Row(
+          title: const Row(
             children: [
-              const Text('Library',
+              Text('Library',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               Icon(Icons.arrow_drop_down),
             ],
@@ -48,7 +48,7 @@ class PlaylistScreen extends StatelessWidget {
               icon: const Icon(Icons.search),
               onPressed: () {},
             ),
-            CircleAvatar(
+            const CircleAvatar(
               radius: 15,
               backgroundColor: Colors.grey,
               child: Icon(Icons.person, size: 20, color: Colors.white),
@@ -65,18 +65,15 @@ class PlaylistScreen extends StatelessWidget {
               child: Row(
                 children: [
                   _buildFilterChip('Playlists', true),
-                  _buildFilterChip('Songs', false),
-                  _buildFilterChip('Albums', false),
-                  _buildFilterChip('Artists', false),
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+            const Padding(
+              padding: EdgeInsets.all(16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Recent activity',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
@@ -114,12 +111,12 @@ class PlaylistScreen extends StatelessWidget {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          child: Icon(Icons.add),
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-        ),
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () {},
+        //   child: const Icon(Icons.add),
+        //   backgroundColor: Colors.white,
+        //   foregroundColor: Colors.black,
+        // ),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Colors.black,
           selectedItemColor: Colors.white,
@@ -197,10 +194,10 @@ class PlaylistScreen extends StatelessWidget {
       ),
       subtitle: Text(
         'Playlist • ${playlist.creator} • ${playlist.songIds.length} tracks',
-        style: TextStyle(color: Colors.grey),
+        style: const TextStyle(color: Colors.grey),
       ),
       trailing: IconButton(
-        icon: Icon(Icons.more_vert),
+        icon: const Icon(Icons.more_vert),
         onPressed: () {},
       ),
       onTap: () {

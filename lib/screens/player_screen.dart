@@ -269,9 +269,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
                           color: const Color(0xFF2A2A40),
                           borderRadius: BorderRadius.circular(24),
                         ),
-                        child: Row(
+                        child: const Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
+                          children: [
                             Icon(
                               Icons.queue_music,
                               color: Colors.white,

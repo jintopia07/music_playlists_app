@@ -191,19 +191,19 @@ class PlaylistDetailScreen extends StatelessWidget {
                 child: const Text('Play'),
               ),
               const SizedBox(width: 8.0),
-              OutlinedButton(
-                onPressed: () {},
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.white),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                child: const Text(
-                  'Shuffle',
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
+              // OutlinedButton(
+              //   onPressed: () {},
+              //   style: OutlinedButton.styleFrom(
+              //     side: const BorderSide(color: Colors.white),
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(20),
+              //     ),
+              //   ),
+              //   child: const Text(
+              //     'Shuffle',
+              //     style: TextStyle(color: Colors.white),
+              //   ),
+              // ),
             ],
           ),
         ],

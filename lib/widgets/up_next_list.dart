@@ -79,20 +79,6 @@ class UpNextList extends StatelessWidget {
                     ),
                   ),
                 ),
-                Expanded(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      child: Text(
-                        'RELATED',
-                        style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -129,20 +115,20 @@ class UpNextList extends StatelessWidget {
                     color: const Color(0xFF2A2A40),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(
                       horizontal: 16.0,
                       vertical: 8.0,
                     ),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.playlist_add,
                           color: Colors.white,
                           size: 20,
                         ),
-                        const SizedBox(width: 8),
-                        const Text(
+                        SizedBox(width: 8),
+                        Text(
                           'Save',
                           style: TextStyle(
                             color: Colors.white,
