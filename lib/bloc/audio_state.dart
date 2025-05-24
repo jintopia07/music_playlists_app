@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import '../models/song.dart';
 import '../models/playlist.dart';
 
-enum AudioStatus { initial, loading, loaded, playing, paused }
+enum AudioStatus { initial, loading, loaded, playing, paused, completed }
 
 enum ScreenView { playlists, playlistDetail, player }
 

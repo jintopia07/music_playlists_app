@@ -24,7 +24,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
           previous.position != current.position ||
           previous.duration != current.duration,
       listener: (context, state) {
-        setState(() {});
+        // Force rebuild when status changes
+        if (mounted) {
+          setState(() {});
+        }
       },
       builder: (context, state) {
         if (state.currentSong == null) {
@@ -92,6 +95,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   } else {
                     context.read<AudioBloc>().add(ResumeSong());
                   }
+                  // Force rebuild
+                  setState(() {});
                 },
               ),
             ],
@@ -232,6 +237,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               } else {
                                 context.read<AudioBloc>().add(ResumeSong());
                               }
+                              // Force rebuild
+                              setState(() {});
                             },
                           ),
                         ),

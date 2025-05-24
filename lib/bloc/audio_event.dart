@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:just_audio/just_audio.dart';
 import '../models/song.dart';
 import '../models/playlist.dart';
 
@@ -65,3 +66,12 @@ class SeekTo extends AudioEvent {
 }
 
 class ReturnToPlaylists extends AudioEvent {}
+
+class UpdatePlayerState extends AudioEvent {
+  final PlayerState playerState;
+
+  const UpdatePlayerState(this.playerState);
+
+  @override
+  List<Object> get props => [playerState];
+}

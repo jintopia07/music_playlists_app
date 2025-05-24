@@ -1,20 +1,16 @@
-import 'dart:async';
-import 'dart:convert';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:http/http.dart' as http;
-import '../models/song.dart';
-import '../models/playlist.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:async';
 import 'audio_event.dart';
 import 'audio_state.dart';
+import '../models/song.dart';
+import '../models/playlist.dart';
 
 class AudioBloc extends Bloc<AudioEvent, AudioState> {
   final AudioPlayer _audioPlayer = AudioPlayer();
   StreamSubscription<Duration>? _positionSubscription;
   StreamSubscription<Duration?>? _durationSubscription;
-
-  // You can replace this with your actual API base URL
-  final String _apiBaseUrl = 'https://api.example.com/music';
+  StreamSubscription<PlayerState>? _playerStateSubscription;
 
   AudioBloc() : super(const AudioState()) {
     on<LoadPlaylists>(_onLoadPlaylists);
@@ -28,6 +24,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
     on<UpdateDuration>(_onUpdateDuration);
     on<SeekTo>(_onSeekTo);
     on<ReturnToPlaylists>(_onReturnToPlaylists);
+    on<UpdatePlayerState>(_onUpdatePlayerState);
 
     // Listen to position changes
     _positionSubscription = _audioPlayer.positionStream.listen(
@@ -42,6 +39,29 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
         }
       },
     );
+
+    // Listen to player state changes
+    _playerStateSubscription = _audioPlayer.playerStateStream.listen(
+      (playerState) {
+        add(UpdatePlayerState(playerState));
+      },
+    );
+  }
+
+  void _onUpdatePlayerState(UpdatePlayerState event, Emitter<AudioState> emit) {
+    final playerState = event.playerState;
+
+    // Update the audio status based on the player state
+    AudioStatus status;
+    if (playerState.playing) {
+      status = AudioStatus.playing;
+    } else if (playerState.processingState == ProcessingState.completed) {
+      status = AudioStatus.completed;
+    } else {
+      status = AudioStatus.paused;
+    }
+
+    emit(state.copyWith(status: status));
   }
 
   void _onUpdatePosition(UpdatePosition event, Emitter<AudioState> emit) {
@@ -303,16 +323,14 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
   }
 
   Future<void> _onPauseSong(PauseSong event, Emitter<AudioState> emit) async {
-    if (state.status == AudioStatus.playing) {
-      await _audioPlayer.pause();
-      emit(state.copyWith(status: AudioStatus.paused));
-    }
+    await _audioPlayer.pause();
+    // The state will be updated by the playerStateStream listener
   }
 
   Future<void> _onResumeSong(ResumeSong event, Emitter<AudioState> emit) async {
-    if (state.status == AudioStatus.paused) {
+    if (state.currentSong != null) {
       await _audioPlayer.play();
-      emit(state.copyWith(status: AudioStatus.playing));
+      // The state will be updated by the playerStateStream listener
     }
   }
 
@@ -352,6 +370,7 @@ class AudioBloc extends Bloc<AudioEvent, AudioState> {
   Future<void> close() {
     _positionSubscription?.cancel();
     _durationSubscription?.cancel();
+    _playerStateSubscription?.cancel();
     _audioPlayer.dispose();
     return super.close();
   }
